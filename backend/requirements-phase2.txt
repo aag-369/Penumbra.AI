@@ -1,0 +1,19 @@
+# Dependencies for the agent and quantum layers. Not required to run or test
+# what is currently implemented, and deliberately kept out of requirements.txt
+# so the Phase-1 install stays small and fast.
+
+-r requirements.txt
+
+# --- Agent orchestration ----------------------------------------------------
+langgraph>=0.2
+langchain-core>=0.3
+anthropic>=0.40
+
+# --- Quantum simulation -----------------------------------------------------
+pennylane>=0.38
+qiskit>=1.2
+qiskit-aer>=0.15
+
+# --- Market data ------------------------------------------------------------
+yfinance>=0.2
+scikit-learn>=1.5           # Ledoit-Wolf covariance shrinkage

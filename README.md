@@ -1,0 +1,2 @@
+# Penumbra.AI
+A privacy-preserving investment advisory system using homomorphic encryption (CKKS).  Your portfolio never touches an unencrypted server. All asset data—holdings, quantities, cost basis—is encrypted client-side with CKKS (Microsoft SEAL), sent to the server as ciphertexts, and decrypted only in your browser. The advisory engine computes optimal allocations over your encrypted data without ever seeing the plaintext.

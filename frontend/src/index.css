@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-ink-950 text-mist font-sans antialiased;
+    background-image:
+      radial-gradient(900px 500px at 12% -8%, rgba(139, 92, 246, 0.10), transparent 60%),
+      radial-gradient(760px 420px at 92% 4%, rgba(34, 211, 238, 0.07), transparent 62%);
+    background-attachment: fixed;
+  }
+  ::selection {
+    @apply bg-umbra/35 text-white;
+  }
+  *:focus-visible {
+    @apply outline-none ring-2 ring-umbra/70 ring-offset-2 ring-offset-ink-950;
+  }
+  /* A dark scrollbar; the default light one is jarring against near-black. */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: #0b0d12; }
+  ::-webkit-scrollbar-thumb { background: #242a36; border-radius: 6px; }
+  ::-webkit-scrollbar-thumb:hover { background: #333a4a; }
+}
+
+@layer components {
+  .panel {
+    @apply rounded-xl border border-ink-700 bg-ink-850/70 backdrop-blur-sm;
+  }
+  .panel-hd {
+    @apply flex items-center justify-between gap-3 border-b border-ink-700 px-5 py-3.5;
+  }
+  .label {
+    @apply text-[11px] font-medium uppercase tracking-[0.14em] text-mist-faint;
+  }
+  .field {
+    @apply w-full rounded-lg border border-ink-600 bg-ink-900 px-3.5 py-2.5 text-sm text-mist
+           placeholder:text-mist-faint/70 transition-colors focus:border-umbra/60;
+  }
+  /* Ciphertext is always shown in this treatment so it is unmistakable. */
+  .cipher-text {
+    @apply break-all font-mono text-[11px] leading-relaxed text-cipher/85;
+  }
+}

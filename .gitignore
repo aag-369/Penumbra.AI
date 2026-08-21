@@ -1,0 +1,47 @@
+# --- Python -----------------------------------------------------------------
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# --- Node -------------------------------------------------------------------
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+
+# NOTE: package-lock.json is deliberately NOT ignored. Vercel and CI need it for
+# reproducible installs.
+
+# --- Secrets and local state ------------------------------------------------
+.env
+.env.local
+.env.*.local
+*.db
+*.db-wal
+*.db-shm
+
+# --- CKKS key material ------------------------------------------------------
+# The keystore holds only *public* contexts, but they are tens of megabytes each
+# and belong nowhere near version control. A private context must never be
+# committed at all -- the CI security job fails the build if one appears.
+keystore/
+*.ctx
+*.sealed
+
+# --- Editors and OS ---------------------------------------------------------
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Deployment -------------------------------------------------------------
+.vercel
+
+# Scratch folder for files Claude could not delete directly.
+_to_delete/
