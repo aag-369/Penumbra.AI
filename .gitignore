@@ -45,3 +45,6 @@ Thumbs.db
 
 # Scratch folder for files Claude could not delete directly.
 _to_delete/
+
+# Files the Claude desktop app saves into a connected folder -- not project source.
+Claude outputs/

@@ -1,10 +1,10 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 
 import { useApp } from "../store/AppContext";
 import { Badge, Dot } from "./ui";
 
 const NAV = [
-  { to: "/", label: "Dashboard", end: true },
+  { to: "/dashboard", label: "Dashboard", end: true },
   { to: "/keys", label: "Keys" },
   { to: "/portfolio", label: "Portfolio" },
   { to: "/advisor", label: "Advisor" },
@@ -51,7 +51,9 @@ export default function Layout() {
   return (
     <div className="flex min-h-screen items-start">
       <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col overflow-y-auto border-r border-ink-700/80 bg-ink-900/50 px-4 py-5 lg:flex">
-        <Logo />
+        <Link to="/" aria-label="PENUMBRA.AI — back to the website" className="rounded-md">
+          <Logo />
+        </Link>
 
         <nav className="mt-8 space-y-0.5">
           {NAV.map((item) => (
@@ -118,7 +120,9 @@ export default function Layout() {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-ink-700/80 bg-ink-950/85 px-5 py-3 backdrop-blur-md lg:px-8">
           <div className="lg:hidden">
-            <Logo />
+            <Link to="/" aria-label="PENUMBRA.AI — back to the website" className="rounded-md">
+              <Logo />
+            </Link>
           </div>
           <nav className="hidden gap-1 overflow-x-auto lg:hidden" />
           <div className="ml-auto flex items-center gap-2.5">{keyBadge}</div>

@@ -22,10 +22,25 @@ export default {
         ok: "#34d399",
         warn: "#fbbf24",
         bad: "#f87171",
+        // The public website's palette (src/landing). Kept separate from the
+        // app tokens above so neither can drift the other.
+        brand: {
+          ink: "#0e1015",
+          slate: "#1a202c",
+          abyss: "#0a0e12",
+          mist: "#e2e8f0",
+          gray: "#94a3b8",
+          cloud: "#cbd5e1",
+          cipher: { DEFAULT: "#0ea5e9", hover: "#0891b2", dark: "#0369a1", light: "#06b6d4" },
+          umbra: { DEFAULT: "#7c3aed", hover: "#6d28d9", dark: "#5b21b6", light: "#a78bfa" },
+          ok: "#10b981",
+          warn: "#f59e0b",
+          bad: "#ef4444",
+        },
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "-apple-system", "Segoe UI", "sans-serif"],
-        mono: ["JetBrains Mono", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+        sans: ["Inter Variable", "Inter", "system-ui", "-apple-system", "Segoe UI", "sans-serif"],
+        mono: ["JetBrains Mono Variable", "JetBrains Mono", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
       },
       boxShadow: {
         glow: "0 0 0 1px rgba(139,92,246,0.35), 0 0 32px -8px rgba(139,92,246,0.45)",

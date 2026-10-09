@@ -96,7 +96,7 @@ export default function PortfolioPage() {
           </p>
         </div>
         {portfolio && (
-          <Button variant="ghost" onClick={() => navigate("/")}>
+          <Button variant="ghost" onClick={() => navigate("/dashboard")}>
             View dashboard →
           </Button>
         )}
@@ -203,7 +203,7 @@ export default function PortfolioPage() {
                   Storing a ciphertext per ticker, as the original specification did, would have
                   multiplied this by {parsed.tickers.length} for no benefit.
                 </Alert>
-                <Button onClick={() => navigate("/")} className="w-full">
+                <Button onClick={() => navigate("/dashboard")} className="w-full">
                   Go to dashboard →
                 </Button>
               </div>

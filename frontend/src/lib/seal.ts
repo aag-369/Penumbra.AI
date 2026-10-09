@@ -448,6 +448,142 @@ export class CkksEngine {
     return this.sumSlots(this.multiplyPlain(ciphertext, weights));
   }
 
+  // -- periodic packing ------------------------------------------------------
+  //
+  // A vector of n values is padded to the next power of two p and repeated
+  // across all 4096 slots. Rotations then act cyclically *within* each block of
+  // p, which buys two things: a reduction costs log2(p) rotations instead of
+  // log2(4096), so it sums noise from p slots rather than all of them, and a
+  // plaintext matrix-vector product can use the diagonal method. Together they
+  // are enough to evaluate the Markowitz risk term w^T Sigma w in the default
+  // depth-2 chain.
+
+  /** Block length used to pack `n` values: the next power of two. */
+  static periodFor(n: number): number {
+    let period = 1;
+    while (period < n) period *= 2;
+    return period;
+  }
+
+  /** Pad to the block length and repeat across every slot. */
+  replicate(values: number[], period = CkksEngine.periodFor(values.length)): number[] {
+    const block = Array.from({ length: period }, (_, i) => values[i] ?? 0);
+    return Array.from({ length: this.slotCount }, (_, i) => block[i % period]!);
+  }
+
+  /** Encrypt `values` in periodic packing. */
+  encryptReplicated(values: number[]): string {
+    if (values.length === 0) throw new SealError("cannot encrypt an empty vector");
+    return this.encrypt(this.replicate(values));
+  }
+
+  /** How many rescales this ciphertext has left before the chain is exhausted. */
+  levelsRemaining(ciphertext: string): number {
+    const cipher = this.load(ciphertext);
+    const level = this.context.getContextData(cipher.parmsId).chainIndex;
+    cipher.delete();
+    return level;
+  }
+
+  /**
+   * `sum_i x_i * factors_i` over one block of a periodically packed vector.
+   * One level, log2(period) rotations.
+   */
+  dotPlainPeriodic(ciphertext: string, factors: number[], period = CkksEngine.periodFor(factors.length)): string {
+    this.requireRotationKeys("an encrypted inner product");
+    const x = this.load(ciphertext);
+    const product = this.multiplyPlainCipher(x, this.replicate(factors, period));
+    x.delete();
+    const summed = this.sumBlock(product, period);
+    const out = this.dump(summed);
+    summed.delete();
+    return out;
+  }
+
+  /**
+   * `x^T M x` for a periodically packed `x` and a public matrix `M`.
+   *
+   * Diagonal method for `M x` (one level, `period - 1` rotations), then a
+   * ciphertext-ciphertext product with `x` (second level, relinearised), then a
+   * block reduction. Exactly the default chain's depth of two. Scale `M` by the
+   * risk-aversion coefficient beforehand and this is the Markowitz risk term.
+   */
+  quadraticFormPeriodic(ciphertext: string, matrix: number[][]): string {
+    this.requireRotationKeys("an encrypted quadratic form");
+    const n = matrix.length;
+    if (n === 0 || matrix.some((row) => row.length !== n)) {
+      throw new SealError("quadratic form needs a square, non-empty matrix");
+    }
+    const period = CkksEngine.periodFor(n);
+    const x = this.load(ciphertext);
+
+    let mx: SealCipherText | null = null;
+    for (let k = 0; k < period; k += 1) {
+      const diagonal = Array.from({ length: period }, (_, j) => {
+        const col = (j + k) % period;
+        return j < n && col < n ? matrix[j]![col]! : 0;
+      });
+      if (diagonal.every((v) => v === 0)) continue;
+      const rotated = k === 0 ? x : this.rotateCipher(x, k);
+      const term = this.multiplyPlainCipher(rotated, this.replicate(diagonal, period));
+      if (rotated !== x) rotated.delete();
+      if (mx === null) {
+        mx = term;
+      } else {
+        this.evaluator.add(mx, term, mx);
+        term.delete();
+      }
+    }
+    if (mx === null) throw new SealError("quadratic form of a zero matrix");
+
+    const xAligned = this.seal.CipherText();
+    this.evaluator.cipherModSwitchTo(x, mx.parmsId, xAligned);
+    const product = this.seal.CipherText();
+    this.evaluator.multiply(xAligned, mx, product);
+    this.evaluator.relinearize(product, this.relinKeys, product);
+    this.evaluator.rescaleToNext(product, product);
+    x.delete();
+    xAligned.delete();
+    mx.delete();
+
+    const summed = this.sumBlock(product, period);
+    const out = this.dump(summed);
+    summed.delete();
+    return out;
+  }
+
+  private requireRotationKeys(what: string): void {
+    if (!this.galoisKeys) {
+      throw new SealError(`${what} needs rotation keys, and this key was generated without them`);
+    }
+  }
+
+  private rotateCipher(cipher: SealCipherText, steps: number): SealCipherText {
+    const out = this.seal.CipherText();
+    this.evaluator.rotateVector(cipher, steps, this.galoisKeys!, out);
+    return out;
+  }
+
+  /** Multiply by a plaintext vector encoded at the ciphertext's scale, then rescale. */
+  private multiplyPlainCipher(cipher: SealCipherText, factors: number[]): SealCipherText {
+    const plain = this.encoder.encode(Float64Array.from(factors), cipher.scale)!;
+    const out = this.seal.CipherText();
+    this.evaluator.multiplyPlain(cipher, plain, out);
+    this.evaluator.rescaleToNext(out, out);
+    plain.delete();
+    return out;
+  }
+
+  /** Rotate-and-add within each block; consumes `cipher`. */
+  private sumBlock(cipher: SealCipherText, period: number): SealCipherText {
+    for (let step = 1; step < period; step *= 2) {
+      const rotated = this.rotateCipher(cipher, step);
+      this.evaluator.add(cipher, rotated, cipher);
+      rotated.delete();
+    }
+    return cipher;
+  }
+
   // -- measurement ----------------------------------------------------------
 
   ciphertextBytes(ciphertext: string): number {

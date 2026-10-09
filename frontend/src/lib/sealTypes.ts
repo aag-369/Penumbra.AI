@@ -9,13 +9,19 @@
 
 export interface SealPlainText {
   save(): string;
+  delete(): void;
   readonly scale: number;
 }
+
+/** Opaque handle SEAL uses to identify a level in the modulus chain. */
+export type SealParmsId = unknown;
 
 export interface SealCipherText {
   save(): string;
   load(context: SealContext, base64: string): void;
+  delete(): void;
   readonly scale: number;
+  readonly parmsId: SealParmsId;
 }
 
 interface Serialisable {
@@ -25,6 +31,7 @@ interface Serialisable {
 
 export interface SealContext {
   parametersSet(): boolean;
+  getContextData(parmsId: SealParmsId): { readonly chainIndex: number };
 }
 
 export interface SealTypes {
@@ -40,6 +47,13 @@ export interface SealTypes {
     multiplyPlain(a: SealCipherText, b: SealPlainText, destination: SealCipherText): void;
     relinearize(a: SealCipherText, keys: SealTypes["RelinKeys"], destination: SealCipherText): void;
     rescaleToNext(a: SealCipherText, destination: SealCipherText): void;
+    cipherModSwitchTo(a: SealCipherText, parmsId: SealParmsId, destination: SealCipherText): void;
+    rotateVector(
+      a: SealCipherText,
+      steps: number,
+      keys: SealTypes["GaloisKeys"],
+      destination: SealCipherText,
+    ): void;
     sumElements(
       a: SealCipherText,
       keys: SealTypes["GaloisKeys"],

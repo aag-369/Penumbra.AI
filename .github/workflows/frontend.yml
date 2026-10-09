@@ -22,5 +22,7 @@ jobs:
 
       - run: npm ci
       - run: npm run build
+      # Real CKKS in Node: the periodic-packing ops behind the landing-page demo.
+      - run: npm test
       - run: npm audit --audit-level=high
         continue-on-error: true

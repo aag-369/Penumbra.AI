@@ -5,7 +5,7 @@ import { Alert, Button, Field } from "../components/ui";
 import { useApp } from "../store/AppContext";
 
 export default function LoginPage() {
-  const { signIn, signUp, user } = useApp();
+  const { signIn, signUp, user, backend } = useApp();
   const navigate = useNavigate();
   const [mode, setMode] = useState<"signin" | "signup">("signup");
   const [email, setEmail] = useState("");
@@ -13,7 +13,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  if (user) navigate("/", { replace: true });
+  if (user) navigate("/dashboard", { replace: true });
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -98,9 +98,19 @@ export default function LoginPage() {
 
         <div className="mt-5 rounded-lg border border-ink-700 bg-ink-900/50 px-4 py-3">
           <p className="text-[11px] leading-relaxed text-mist-faint">
-            <span className="text-mist-dim">Running standalone.</span> Accounts and portfolios live in
-            this browser. The CKKS encryption is real Microsoft SEAL compiled to WebAssembly — only
-            storage is local.
+            {backend?.mode === "live" ? (
+              <>
+                <span className="text-mist-dim">API connected.</span> Accounts and portfolios still live
+                in this browser until the Phase-6 ciphertext interop lands. The CKKS encryption is real
+                Microsoft SEAL compiled to WebAssembly either way.
+              </>
+            ) : (
+              <>
+                <span className="text-mist-dim">Running standalone.</span> Accounts and portfolios live in
+                this browser. The CKKS encryption is real Microsoft SEAL compiled to WebAssembly — only
+                storage is local.
+              </>
+            )}
           </p>
         </div>
       </div>

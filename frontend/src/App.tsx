@@ -1,52 +1,31 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { lazy, Suspense } from "react";
+import { Route, Routes } from "react-router-dom";
 
-import Layout from "./components/Layout";
-import { Spinner } from "./components/ui";
-import AdminPage from "./pages/AdminPage";
-import AdvisorPage from "./pages/AdvisorPage";
-import CryptoLabPage from "./pages/CryptoLabPage";
-import DashboardPage from "./pages/DashboardPage";
-import KeysPage from "./pages/KeysPage";
-import LoginPage from "./pages/LoginPage";
-import PortfolioPage from "./pages/PortfolioPage";
-import { useApp } from "./store/AppContext";
+import LandingPage from "./landing/LandingPage";
 
-function Booting() {
+// The app is a separate chunk: visitors to `/` download the landing page only.
+const AppShell = lazy(() => import("./AppShell"));
+
+function Loading() {
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <Spinner className="h-6 w-6 text-umbra" />
+    <div className="flex min-h-screen items-center justify-center" role="status" aria-label="Loading">
+      <span className="h-6 w-6 animate-spin rounded-full border-2 border-umbra/30 border-t-umbra" />
     </div>
   );
 }
 
 export default function App() {
-  const { ready, user } = useApp();
-  if (!ready) return <Booting />;
-
-  if (!user) {
-    return (
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
-    );
-  }
-
   return (
     <Routes>
-      <Route path="/login" element={<Navigate to="/" replace />} />
-      <Route element={<Layout />}>
-        <Route index element={<DashboardPage />} />
-        <Route path="keys" element={<KeysPage />} />
-        <Route path="portfolio" element={<PortfolioPage />} />
-        <Route path="advisor" element={<AdvisorPage />} />
-        <Route path="lab" element={<CryptoLabPage />} />
-        <Route
-          path="admin"
-          element={user.role === "admin" ? <AdminPage /> : <Navigate to="/" replace />}
-        />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Route>
+      <Route path="/" element={<LandingPage />} />
+      <Route
+        path="*"
+        element={
+          <Suspense fallback={<Loading />}>
+            <AppShell />
+          </Suspense>
+        }
+      />
     </Routes>
   );
 }

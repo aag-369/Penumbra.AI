@@ -77,16 +77,39 @@ backend uses TenSEAL, and their serialisation formats do not yet interoperate.
 
 ## 3 · Run it locally
 
+**The one-click way.** In the project folder:
+
+| You are on | Do this | You get |
+| --- | --- | --- |
+| Windows | double-click **`start.bat`** | website + API, browser opens |
+| Windows, no Python | double-click **`start-website-only.bat`** | website in demo mode |
+| macOS / Linux | `bash start.sh` (or `bash start.sh --website-only`) | the same |
+
+You need **Node.js 18+** (20 LTS recommended) and, for the API, **Python
+3.11 – 3.14** (TenSEAL publishes no wheels for older versions). The first run
+installs everything — a minute for the website, a few minutes for the API — and
+later runs start in seconds. The launcher creates `backend/.venv` and a
+`backend/.env` with a fresh random JWT secret; both are git-ignored.
+
+The website is at **http://localhost:3000** — the landing page is `/`, the app
+behind *Launch App* is `/dashboard`. Nothing needs configuring to connect them:
+a page served from `localhost` looks for the API on port 8000 by itself, and the
+hero's *System Status* badge shows **Online** when it finds it and **Demo Mode**
+when it does not.
+
+**By hand**, if you prefer:
+
 ```bash
 cd frontend
 npm install
 npm run dev          # http://localhost:3000
+npm test             # real CKKS tests for the demo's encrypted operations
 ```
 
 Then in the browser: create an account → generate a key → upload the sample
 portfolio → dashboard. About ninety seconds end to end.
 
-Key generation takes a few seconds and produces roughly 34 MB of rotation keys
+Key generation takes a few seconds and produces roughly 32 MB of rotation keys
 in memory. That is not a bug; it is the measurement the Keys page reports, and it
 is the reason the backend stores public contexts on disk rather than in a
 database column.
@@ -100,7 +123,7 @@ pip install -r requirements.txt
 cp .env.example .env
 
 uvicorn app.main:app --reload    # http://localhost:8000/docs
-pytest -q                        # 261 tests
+pytest -q                        # 265 tests (3 QAOA benchmarks skip until Phase 4)
 python -m scripts.demo           # the end-to-end privacy demonstration
 ```
 

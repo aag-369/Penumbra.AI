@@ -122,6 +122,6 @@ rounded on the client after decryption — never treated as exact.
 cd backend
 pip install -r requirements.txt
 uvicorn app.main:app --reload      # docs at http://localhost:8000/docs
-pytest -q                          # 255 tests
+pytest -q                          # 265 tests
 pytest --cov=app --cov-report=term # 89% coverage
 ```

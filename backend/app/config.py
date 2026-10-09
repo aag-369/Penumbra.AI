@@ -8,12 +8,13 @@ start with development placeholders when ``ENVIRONMENT=production``.
 from __future__ import annotations
 
 import functools
+import json
 import secrets
 from pathlib import Path
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import Field, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -78,13 +79,18 @@ class Settings(BaseSettings):
     max_qubits: int = 20
 
     # -- CORS ---------------------------------------------------------------
-    cors_origins: list[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
+    #: ``NoDecode`` matters: without it pydantic-settings JSON-decodes list
+    #: fields from ``.env`` and the environment *before* any validator runs, so
+    #: the comma-separated form in ``.env.example`` failed to start the app.
+    cors_origins: Annotated[list[str], NoDecode] = ["http://localhost:3000", "http://127.0.0.1:3000"]
 
     @field_validator("cors_origins", mode="before")
     @classmethod
     def _split_origins(cls, v: object) -> object:
-        """Accept a comma-separated string from the environment."""
+        """Accept a comma-separated string, or a JSON list, from the environment."""
         if isinstance(v, str):
+            if v.strip().startswith("["):
+                return json.loads(v)
             return [o.strip() for o in v.split(",") if o.strip()]
         return v
 

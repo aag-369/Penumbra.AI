@@ -16,7 +16,7 @@ alembic>=1.13               # migrations, for anything past development
 
 # --- Validation and settings ------------------------------------------------
 pydantic>=2.7,<3.0
-pydantic-settings>=2.2
+pydantic-settings>=2.7     # 2.7 added NoDecode, used for CORS_ORIGINS
 email-validator>=2.1
 
 # --- Authentication ---------------------------------------------------------
